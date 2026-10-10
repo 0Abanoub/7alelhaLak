@@ -1,0 +1,15 @@
+Your proposed plan is approved in direction, but refine the plan with these requirements before any edits. Do not implement yet.
+
+1. CSV headers: detect duplicate original headers before pandas can automatically rename them. Detect collisions both before and after normalization/alias mapping. Include examples such as "Product Name" and "product_name", and preserve original header names for diagnostics. Implement equivalent detection for Excel headers.
+
+2. Dates: keep parsing strict and year-first. Explicitly test invalid calendar dates, timezone-bearing strings, numeric date-like values, native Python/pandas date and datetime objects, and genuine Excel date cells. Do not guess ambiguous day/month order or silently interpret numeric values as dates. If Excel serial-date support is proposed, specify exactly how genuine date-formatted cells are distinguished from ordinary numeric cells.
+
+3. Source row numbers: define the convention precisely. For CSV/Excel, the first data row should be row 2 when row 1 is the header. Preserve row identity through cleaning and sorting, and use original row numbers in all issue/duplicate reports. Avoid adding helper columns to the public DataFrame unless they are removed before return.
+
+4. Report safety: never include raw customer cell values. Include row number, canonical field, issue type, and actionable fix. On validation failure, no usable DataFrame should reach analytics. Keep the legacy APIs and ValueError compatibility.
+
+5. Duplicates: flag exact repeated cleaned rows as possible duplicates, retain every row, and state that identical rows can be legitimate sales. Define how extra columns affect duplicate matching and test that behavior.
+
+6. Numeric values: ensure booleans are rejected rather than converted to 0/1. Reject unsupported locale formats and non-finite values. Preserve existing overflow checks and non-negative validation.
+
+Update the proposed implementation and test plan to cover these points, then stop and show the revised plan. Do not edit files, install dependencies, run formatters, or perform Git mutations until I explicitly approve implementation.
