@@ -199,14 +199,17 @@ Interactive dashboard      Computed metrics
                                 |
                                 v
                      Evidence and recommendations
+```
 
-
-Core Engineering Principle
+## Core Engineering Principle
 Python is responsible for numerical correctness; the LLM is responsible for interpretation and explanation.
 The LLM must not independently invent or recalculate financial totals when authoritative calculated values are available.
 Provide only the relevant metrics and supporting product-level or time-series summaries needed to answer a question. Avoid sending the entire dataset to the LLM by default.
-9. Team Responsibilities
+
+
+## 9. Team Responsibilities
 This is a two-person hackathon project.
+
 Abanoub — Product, Analytics, Dashboard, and Integration
 Primary responsibilities:
 - Data ingestion and validation.
@@ -219,7 +222,8 @@ Primary files:
 - data_loader.py
 - analytics.py
 - dashboard.py
-Sadio — AI and Business Insights
+
+Mohamed — AI and Business Insights
 Primary responsibilities:
 - LLM provider integration.
 - Business question answering.
@@ -229,8 +233,10 @@ Primary responsibilities:
 Primary files:
 - ai_analyst.py
 - insights.py
+
 Both developers must coordinate changes to shared contracts and dependencies.
-10. Shared Interface Contract
+
+## 10. Shared Interface Contract
 Agree on function signatures and data structures before integrating independently developed components.
 Proposed interfaces:
 # analytics.pydef analyze_sales(df) -> dict:    ...# insights.pydef generate_insights(metrics: dict) -> dict:    ...# ai_analyst.pydef answer_business_question(    question: str,    metrics: dict,    language: str = "auto",) -> dict:    ...
@@ -240,7 +246,8 @@ Proposed interfaces:
 These are proposed interfaces, not implemented functions.
 The metrics dictionary should contain clearly defined calculated values, relevant product-level summaries, trend information, and data-quality warnings. Its exact keys and types must be agreed upon by both developers.
 AI responses should use a predictable structure containing findings, evidence, recommendations, and limitations. Validate the response before displaying it.
-11. Git and Collaboration Rules
+
+## 11. Git and Collaboration Rules
 GitHub is the shared source of truth for code.
 - Use separate feature branches for parallel development.
 - Keep commits small and focused.
@@ -252,7 +259,8 @@ GitHub is the shared source of truth for code.
 - Inspect the actual code before claiming a feature is implemented.
 - Avoid unnecessary dependencies and architectural changes.
 - Prioritize a complete, reliable demo over unfinished features.
-12. Instructions for AI Coding Assistants
+
+## 12. Instructions for AI Coding Assistants
 Any AI model or coding agent working on this repository must:
 1. Read this README and inspect the actual repository before making changes.
 2. Distinguish planned features from implemented and tested functionality.
@@ -268,8 +276,10 @@ Any AI model or coding agent working on this repository must:
 12. Do not claim tests passed unless they were actually executed and their results inspected.
 13. Prefer the smallest reliable implementation that advances the MVP.
 Before implementing a feature, inspect the current code and its dependencies. Make focused changes, validate the result, and report the files changed and tests actually performed.
-13. Running the Application
+
+## 13. Running the Application
 The repository currently contains the initial project scaffold. The application entry point and feature modules must be implemented before the complete MVP can run.
+
 Create and activate a virtual environment:
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -284,7 +294,8 @@ python -m streamlit run app.py
 
 
 Configure any required LLM API key through local environment configuration or Replit Secrets. Never commit the actual secret to GitHub.
-14. Security, Privacy, and Reliability
+
+## 14. Security, Privacy, and Reliability
 Even for a hackathon prototype:
 - Treat uploaded files as untrusted input.
 - Validate file types, required columns, data types, and file sizes.
@@ -296,7 +307,8 @@ Even for a hackathon prototype:
 - Handle invalid files and API failures without crashing the application.
 - Do not imply that recommendations guarantee business outcomes.
 The prototype demonstrates business analytics and decision support; it does not replace professional accounting or guarantee business results.
-15. Judge-Facing Demo
+
+## 15. Judge-Facing Demo
 The intended demonstration flow is:
 1. Upload a sample business sales dataset.
 2. View revenue, profit, sales trends, and product performance.
