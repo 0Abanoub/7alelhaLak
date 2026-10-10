@@ -1,0 +1,27 @@
+Continue the 7alelhaLak CREATIVA hackathon project.
+
+TASK: Implement the next unfinished business-insights requirements from README.md using the current analytics.py output and docs/analytics-contract.md.
+
+BEFORE EDITING:
+1. Inspect git status, insights.py, analytics.py, tests/test_analytics.py, app.py, and the analytics contract.
+2. Confirm the current generate_insights() output format and how app.py consumes it.
+3. Preserve all existing work. Do not modify data_loader.py, app.py, dashboard presentation, .replit, replit.md, setup scripts, or dependency files.
+4. Do not commit, push, merge, reset, switch branches, or discard changes.
+
+IMPLEMENT IN insights.py AND DEDICATED INSIGHTS TESTS ONLY:
+- Compare sales across periods only when available dates and data support a meaningful comparison.
+- Detect products with declining sales using actual observed periods.
+- Identify high-revenue products with weak margins when cost data is complete.
+- Identify significant contributors to total profit when metrics support this calculation.
+- Clearly distinguish calculated findings from suggested actions and data limitations.
+
+CORRECTNESS CONSTRAINTS:
+- Do not treat missing dates as zero sales.
+- Do not infer causes, current inventory, or business facts absent from the data.
+- Handle sparse history, ties, zero denominators, missing/incomplete costs, zero revenue, and empty product summaries safely.
+- Do not fabricate thresholds or label an arbitrary change statistically significant. If a threshold is needed, document a simple, transparent rule.
+- Preserve the current public interface unless README or the contract requires a change. If a change is necessary, stop and report the interface conflict rather than editing app.py.
+
+Add focused unit tests using in-memory metrics/data. Run the dedicated insights tests and existing analytics tests if possible. Report exact commands and results; do not claim unrun tests passed.
+
+FINAL REPORT: files changed, rules implemented, edge cases tested, exact test results, and remaining contract decisions. Stop after this task.
