@@ -14,6 +14,13 @@ python -m streamlit run app.py --server.address 0.0.0.0 --server.port 5000
 Dependencies are in `requirements.txt`. Replit manages the Python runtime and
 installed packages; no virtual environment is needed here.
 
+## After task merges
+
+The configured `scripts/post-merge.sh` installs `requirements.txt` into the
+project's writable `.pythonlibs` prefix. Do not use a plain pip install in this
+hook: Nix's system Python package directory is immutable. The hook is
+non-interactive and fails on dependency errors; Replit then reconciles workflows.
+
 ## Implemented
 
 - Fictional sample sales and CSV/.xlsx uploads (10 MB limit).
