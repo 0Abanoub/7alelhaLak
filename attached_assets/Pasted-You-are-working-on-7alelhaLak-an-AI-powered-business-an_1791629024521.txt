@@ -1,0 +1,17 @@
+You are working on 7alelhaLak (حللهالك), an AI-powered business analytics copilot for small and medium businesses, as part of the CREATIVA hackathon.
+
+1. Read README.md completely. Treat its requirements, architecture, development order, and constraints as the source of truth. Inspect the current project files before proposing or making changes.
+
+2. Sadio is currently implementing data validation and cleaning and has NOT pushed to main yet. Do not modify, replace, rename, or duplicate data_loader.py or any files Sadio is actively editing. Do not implement another cleaning/validation pipeline. Do not assume his implementation or final interface. Keep your work independent of unfinished changes; document assumptions and make them easy to adapt later. Do not change branches, commit, push, merge, reset, or discard changes.
+
+3. Inspect analytics.py, dashboard.py, insights.py, ai_analyst.py, app.py, requirements.txt, sample_data/sales.csv, and README.md. Some files may already contain generated code. Do not rewrite working code just to produce a different implementation.
+
+4. Identify the next unfinished README requirement that can be implemented without relying on Sadio’s in-progress work. Prefer the analytics layer if it is next. Calculate only metrics supported by the already-cleaned DataFrame, following the README’s schema and metric definitions: revenue, profit and margin only when unit costs are available, units sold, transaction count, daily trends, and product performance. Do not assume every dataset supports every metric, fabricate data, or treat missing costs as zero. If analytics is already correct, do not rebuild it; move to the next independent README requirement such as dashboard integration or evidence-based insights.
+
+5. Make the smallest coherent change. Keep business calculations separate from Streamlit presentation. Use understandable errors. Avoid unnecessary dependencies. Do not implement live AI, select an LLM provider, or require API keys unless the README explicitly requires this now. Do not add unrelated features.
+
+6. Run relevant tests/checks if possible. Report only commands actually run and their actual results. Do not claim the app works unless it was tested.
+
+7. Final report must state: selected README requirement and why it is independent; files inspected; files changed and reasons; assumptions about Sadio’s future interface; tests/commands and results; remaining issues and next logical task.
+
+Inspect first, then implement only the appropriate independent task. If the README is ambiguous or the existing code makes the next task unclear, stop and report findings rather than making speculative changes.

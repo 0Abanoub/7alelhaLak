@@ -1,0 +1,1 @@
+- [Team editing boundaries](team-editing-boundaries.md) — validation belongs to a teammate; keep analytics independent and avoid Git mutations.
