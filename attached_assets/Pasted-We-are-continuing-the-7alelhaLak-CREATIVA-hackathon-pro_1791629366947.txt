@@ -1,0 +1,22 @@
+We are continuing the 7alelhaLak CREATIVA hackathon project. Read README.md, docs/analytics-contract.md, and the existing analytics tests before making changes.
+
+TASK: Verify and strengthen the existing analytics layer using already-cleaned Pandas DataFrames. Do not implement the data loader or AI integration.
+
+OWNERSHIP AND SAFETY RULES
+- Sadio is still working on data validation and cleaning and has not pushed to main.
+- Do not edit data_loader.py, app.py, tests/test_sales.py, or any file Sadio owns.
+- Do not change Git branches, commit, push, merge, reset, discard, or overwrite unrelated work.
+- Inspect Git status and the current diff before editing. Preserve all existing changes.
+- Keep the task small. Do not rewrite working functions unnecessarily.
+
+WORK TO PERFORM
+1. Inspect analytics.py, tests/test_analytics.py, and docs/analytics-contract.md. Identify discrepancies between the documented contract, implementation, and existing tests.
+2. Verify calculations for revenue, profit, overall margin, units sold, transaction count, daily revenue, product performance, and ties in product rankings.
+3. Check edge cases including an empty DataFrame, zero revenue, missing unit_cost, incomplete cost values if permitted by the documented contract, and numeric overflow.
+4. Follow the README and analytics contract. Do not silently treat unavailable costs as zero. Do not modify the data loader to make analytics tests pass.
+5. Add or adjust only analytics-specific tests and the minimum necessary analytics implementation. Use small in-memory DataFrames rather than depending on uploaded files.
+6. Run relevant analytics tests if possible. Report exact commands and actual results. If dependencies are unavailable, report that honestly.
+
+Do not expand scope into dashboard changes, insights, AI, requirements cleanup, or loader integration.
+
+FINAL REPORT: list findings, files changed, test commands and results, unresolved contract decisions, and anything requiring Sadio's input. Distinguish verified results from assumptions. Stop after this task.

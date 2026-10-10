@@ -62,6 +62,64 @@ class AnalyticsTests(unittest.TestCase):
         self.assertEqual(m["total_profit"], 90)
         self.assertEqual(m["profit_margin"], 100)
 
+    def test_profit_ties(self):
+        self.df["unit_cost"] = 0.0
+        self.df["unit_price"] = 10.0
+        m = analyze_sales(self.df)
+        self.assertCountEqual(m["most_profitable_products"], ["A", "B"])
+        self.assertCountEqual(m["best_selling_products"], ["A", "B"])
+
+    def test_sorted_dates_without_invented_days(self):
+        self.df["date"] = pd.to_datetime(["2026-09-03", "2026-09-01", "2026-09-03"])
+        m = analyze_sales(self.df)
+        self.assertEqual(m["daily_sales"]["date"].tolist(),
+                         list(pd.to_datetime(["2026-09-01", "2026-09-03"])))
+        self.assertEqual(m["daily_sales"]["revenue"].tolist(), [60, 30])
+        self.assertEqual(m["products"]["product"].tolist(), ["B", "A"])
+
+    def test_product_zero_revenue_does_not_hide_overall_margin(self):
+        self.df.loc[self.df["product"].eq("A"), "unit_price"] = 0.0
+        m = analyze_sales(self.df)
+        self.assertAlmostEqual(m["profit_margin"], 10)
+        self.assertTrue(pd.isna(m["products"].set_index("product").loc["A", "profit_margin"]))
+
+    def test_overflow_is_explicit(self):
+        for column, value in [("unit_price", 1e308), ("unit_cost", 1e308),
+                              ("quantity", 1e308)]:
+            with self.subTest(column=column):
+                df = self.df.copy()
+                df[column] = value
+                with self.assertRaisesRegex(ValueError, "too large"):
+                    analyze_sales(df)
+        df = self.df.copy()
+        df["quantity"] = 1.0
+        df["unit_price"] = 1e308
+        with self.assertRaisesRegex(ValueError, "too large"):
+            analyze_sales(df)
+
+    def test_integer_multiplication_does_not_wrap(self):
+        df = self.df.iloc[:1].copy()
+        df["quantity"] = 4_000_000_000
+        df["unit_price"] = 4_000_000_000
+        df["unit_cost"] = 0
+        m = analyze_sales(df)
+        self.assertEqual(m["total_revenue"], 1.6e19)
+        self.assertEqual(m["total_profit"], 1.6e19)
+        self.assertEqual(m["units_sold"], 4_000_000_000)
+
+    def test_units_and_margin_overflow(self):
+        df = self.df.copy()
+        df["quantity"] = 1e308
+        df["unit_price"] = 0.0
+        df["unit_cost"] = 0.0
+        with self.assertRaisesRegex(ValueError, "too large"):
+            analyze_sales(df)
+        df = self.df.copy()
+        df["unit_price"] = 1e-308
+        df["unit_cost"] = 1e308 / 10
+        with self.assertRaisesRegex(ValueError, "too large"):
+            analyze_sales(df)
+
     def test_input_unchanged(self):
         original = self.df.copy(deep=True)
         analyze_sales(self.df)
