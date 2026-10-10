@@ -243,7 +243,7 @@ Both developers must coordinate changes to shared contracts and dependencies.
 ## 10. Shared Interface Contract
 Agree on function signatures and data structures before integrating independently developed components.
 Proposed interfaces:
-# analytics.pydef analyze_sales(df) -> dict:    ...# insights.pydef generate_insights(metrics: dict) -> dict:    ...# ai_analyst.pydef answer_business_question(    question: str,    metrics: dict,    language: str = "auto",) -> dict:    ...
+analytics.pydef analyze_sales(df) -> dict:    ...# insights.pydef generate_insights(metrics: dict) -> dict:    ...# ai_analyst.pydef answer_business_question(    question: str,    metrics: dict,    language: str = "auto",) -> dict:    ...
 
 
 
