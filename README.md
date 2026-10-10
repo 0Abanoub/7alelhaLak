@@ -141,6 +141,7 @@ The initial architecture favors a single Streamlit application without a separat
 ├── README.md
 └── sample_data/
     └── sales.csv
+```
 File Responsibilities
 FileResponsibility
 app.pyStreamlit entry point and application integration
@@ -152,7 +153,8 @@ insights.pyInsight generation and business recommendations
 requirements.txtPython dependencies
 sample_data/sales.csvFictional development and demonstration dataset
 This is the intended separation of responsibilities. Adjust it only when there is a concrete reason; avoid unnecessary restructuring during the hackathon.
-7. Initial Data Schema
+
+## 7. Initial Data Schema
 The demonstration dataset uses these columns:
 ColumnTypePurpose
 dateDateTransaction or sales date
@@ -177,7 +179,9 @@ For the complete dataset:
 These definitions assume valid sales transactions and meaningful prices and costs. Returns, discounts, taxes, shipping, and other accounting adjustments must be handled explicitly if present.
 Do not calculate profit when required cost information is unavailable. Show it as unavailable rather than inventing a value.
 Sales history alone cannot establish current inventory levels or confirm stockouts. Inventory analysis requires appropriate inventory data.
-8. Architecture and Data Flow
+
+## 8. Architecture and Data Flow
+```
 User uploads CSV or Excel
           |
           v
