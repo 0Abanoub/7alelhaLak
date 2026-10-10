@@ -2,7 +2,7 @@ import io
 import unittest
 import pandas as pd
 from analytics import analyze_sales
-from data_loader import load_sales, validate_sales
+from data_loader import load_sales, validate_sales, load_sales_with_report, SalesValidationError
 from insights import generate_insights
 
 
@@ -58,6 +58,23 @@ class SalesTests(unittest.TestCase):
         df = load_sales("sample_data/sales.csv")
         df.columns = [" Date ", "Product", "Quantity", "Unit Price", "Unit Cost"]
         self.assertIn("unit_price", validate_sales(df).columns)
+
+    def test_report_api_preserves_sample_dataframe(self):
+        legacy = load_sales("sample_data/sales.csv")
+        reported, report = load_sales_with_report("sample_data/sales.csv")
+        pd.testing.assert_frame_equal(legacy, reported)
+        self.assertEqual(report["status"], "valid")
+        self.assertEqual(report["input_row_count"], 5)
+        self.assertEqual(report["output_row_count"], 5)
+
+    def test_invalid_report_is_value_error_compatible(self):
+        df = load_sales("sample_data/sales.csv")
+        df.loc[0, "quantity"] = -1
+        with self.assertRaises(ValueError) as caught:
+            validate_sales(df)
+        self.assertIsInstance(caught.exception, SalesValidationError)
+        self.assertEqual(caught.exception.report["status"], "invalid")
+        self.assertEqual(caught.exception.report["output_row_count"], 0)
 
 
 if __name__ == "__main__":

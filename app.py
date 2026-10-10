@@ -3,7 +3,7 @@ from pathlib import Path
 import streamlit as st
 from analytics import analyze_sales
 from dashboard import render_dashboard
-from data_loader import load_sales
+from data_loader import load_sales_with_report, SalesValidationError
 from insights import generate_insights
 
 st.set_page_config(page_title="7alelhaLak | حللهالك", layout="wide")
@@ -29,14 +29,48 @@ with st.sidebar:
 if mode == "Upload a file" and uploaded is None:
     st.info("Upload a CSV or Excel file to see your sales dashboard.")
     st.stop()
+
+
+def show_validation_report(report):
+    st.subheader("Data validation report")
+    st.caption(
+        f"{report['input_row_count']:,} source rows; "
+        f"{report['output_row_count']:,} valid output rows. "
+        "CSV record rows / Excel worksheet rows start at 2 after the header. "
+        "No sales rows are discarded."
+    )
+    with st.expander("Cleaning details and rows needing attention", expanded=report["status"] == "invalid"):
+        st.write("Status: " + report["status"])
+        st.write("Successful transformations: " + ", ".join(
+            f"{key.replace('_', ' ')}: {value}" for key, value in report["changes"].items()
+        ))
+        for key, title in [
+            ("column_normalizations", "Header normalization"),
+            ("aliases_mapped", "Column aliases"),
+            ("issues", "Validation issues"),
+            ("duplicate_groups", "Possible duplicate source rows"),
+        ]:
+            if report[key]:
+                st.write(title)
+                st.dataframe(report[key], hide_index=True, width="stretch")
+    for warning in report["warnings"]:
+        st.warning(warning)
+
+
 try:
-    df = load_sales(
+    df, validation_report = load_sales_with_report(
         Path(__file__).with_name("sample_data").joinpath("sales.csv")
         if mode == "Sample data" else uploaded
     )
+except SalesValidationError as exc:
+    st.error(str(exc))
+    show_validation_report(exc.report)
+    st.stop()
 except ValueError as exc:
     st.error(str(exc))
     st.stop()
+
+show_validation_report(validation_report)
 
 if mode == "Sample data":
     st.info("Demo mode — these are fictional sales, not your business results.")
