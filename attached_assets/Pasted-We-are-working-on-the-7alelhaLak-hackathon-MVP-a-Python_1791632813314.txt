@@ -1,0 +1,23 @@
+We are working on the 7alelhaLak hackathon MVP, a Python/Pandas/Streamlit sales analytics application. The current main branch is at commit b669a3b (Implement insights logic and add corresponding tests). The existing app works and the current test suite previously passed: 42 tests and 19 subtests. Do not assume that state without verifying it in the current Replit workspace.
+
+OBJECTIVE: Begin implementing reusable, conservative customer CSV/Excel data validation and cleaning. Work in two stages: inspect and propose first; do not edit files until I explicitly approve your plan.
+
+CURRENT IMPLEMENTATION: data_loader.py exposes validate_sales(df) and load_sales(source, filename=None). It accepts CSV and .xlsx, has a 10 MB limit when source.size is available, normalizes column names by trimming/lowercasing/replacing spaces with underscores, requires date/product/quantity/unit_price, parses and normalizes dates, trims product names, validates quantity/unit_price and optional unit_cost as finite non-negative numbers, checks revenue/cost overflow, then sorts by date. app.py calls load_sales(), catches ValueError and stops, then passes the DataFrame to analyze_sales(). tests/test_sales.py covers sample totals, missing costs, zero revenue, bad data, file errors, Excel loading and normalized column names. docs/analytics-contract.md specifies that analyze_sales(df) receives a non-empty validated/cleaned DataFrame and defines its current output and calculation contract.
+
+PHASE 1 GOAL: Improve recognition of a small, explicit, documented set of common column aliases, for example Sale Date -> date, Product Name -> product, Qty -> quantity, and Price -> unit_price. Avoid fuzzy guessing. If aliases cause two source columns to map to the same canonical field, reject the file with a clear actionable error. Preserve the current canonical column names and analytics contract. Recommend exact alias rules before implementing them.
+
+PHASE 2 GOAL: Conservative cleaning only: normalize column names, trim product text, parse recognizable dates, and convert unambiguous numeric strings. Continue rejecting invalid, negative, or non-finite numeric values. Do not guess ambiguous dates or locale-specific number formats. Do not fabricate missing dates, quantities, prices, or costs. Do not silently discard rows.
+
+PHASE 3 GOAL: Design a cleaning/validation report that tells users what was normalized, which aliases were mapped, and which rows/fields need attention. Flag possible duplicate rows for review without deleting them. Keep the interface simple and backward-compatible where practical. Explain how the report will distinguish successful cleaning from validation errors. Do not add a database or external AI provider.
+
+PHASE 4 GOAL: Plan tests for aliases, collisions, whitespace, dates, numeric conversions, missing/invalid values, possible duplicates, report contents, CSV and Excel handling, and compatibility with existing tests. Propose minimal Streamlit integration to display the report before analytics. Keep dashboard.py, analytics.py, insights.py and sample_data/sales.csv unchanged unless you first justify why a change is essential and obtain approval.
+
+GUARDRAILS:
+- First inspect the actual current Git branch, status, latest commit, data_loader.py, tests/test_sales.py, app.py, and docs/analytics-contract.md. Do not assume the workspace is identical to the description above.
+- Identify any differences from this baseline and report them.
+- In this first response, do not edit or create files, install packages, run formatters, commit, push, merge, switch branches, reset, clean, stash, or discard changes.
+- Propose a small implementation plan with exact files to change, the proposed alias mapping, the cleaning-report interface, error/report behavior, and tests to add.
+- Keep the change focused. Do not introduce a new framework, database, AI integration, fuzzy matching, or unrelated refactoring.
+- Do not claim tests pass unless you actually run them and report the exact command and result.
+
+Stop after reporting the inspection findings and proposed plan. Wait for my explicit approval before editing any files.
