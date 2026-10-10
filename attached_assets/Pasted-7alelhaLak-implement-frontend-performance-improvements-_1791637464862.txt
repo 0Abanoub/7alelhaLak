@@ -1,0 +1,32 @@
+7alelhaLak — implement frontend performance improvements, phase 1
+
+The performance audit was conducted at commit 938f58d. Implement only the first two approved improvements:
+
+1. Retain the latest successfully validated uploaded dataset and its validation report in Streamlit session state, keyed by source mode and a content digest. Do not rely on filename or file size alone.
+2. Make raw sales and validation-detail tables genuinely lazy: do not construct or send their table contents until the relevant expander is opened. Preserve existing warnings, summary information, invalid-upload behavior, and default expander states as closely as practical.
+
+Before editing:
+- Inspect current Git status, latest commit, and diffs.
+- Re-read relevant code in app.py and the installed Streamlit version/API.
+- Confirm how the current upload widget represents a removed, replaced, or invalid file.
+- Report any conflict with the audit before proceeding.
+
+Constraints:
+- Keep changes limited to app.py, unless a documented technical reason requires another file.
+- Do not modify data_loader.py, analytics.py, dashboard.py, insights.py, financial formulas, validation rules, or the analytics contract.
+- Do not add dependencies.
+- Do not cache metrics or observations in this phase.
+- Do not change charts, styling, business logic, or product/date filters.
+- Never reuse a previous successful dataset after the current upload fails validation or is removed.
+- Preserve every valid record and all existing raw-table columns.
+- Do not commit, push, switch branches, reset, stash, or discard unrelated work.
+
+Verification:
+- Add or run focused tests where feasible for cache invalidation and upload replacement behavior.
+- Verify that an unchanged upload is not revalidated on every filter interaction.
+- Verify that opening the raw-table expander displays all selected rows and columns.
+- Verify that closed detail expanders do not eagerly build their tables.
+- Run relevant existing tests and git diff --check.
+- Report exact files changed, test commands and results, and any unverified behavior.
+
+Do not claim a performance improvement without measured timings. Do not commit or push. Return the implementation summary and validation evidence.

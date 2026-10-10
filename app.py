@@ -1,4 +1,5 @@
 """7alelhaLak: minimal runnable sales analytics application."""
+from hashlib import sha256
 from pathlib import Path
 import streamlit as st
 from analytics import analyze_sales
@@ -26,12 +27,16 @@ with st.sidebar:
     )
     st.caption("Uploads are analyzed in this session and are not saved to a database or sent to an AI provider.")
 
+UPLOAD_CACHE_KEY = "_latest_validated_upload_v1"
+if mode != "Upload a file" or uploaded is None:
+    st.session_state.pop(UPLOAD_CACHE_KEY, None)
+
 if mode == "Upload a file" and uploaded is None:
     st.info("Upload a CSV or Excel file to see your sales dashboard.")
     st.stop()
 
 
-def show_validation_report(report):
+def show_validation_report(report, source_key):
     st.subheader("Data validation report")
     st.caption(
         f"{report['input_row_count']:,} source rows; "
@@ -39,38 +44,63 @@ def show_validation_report(report):
         "CSV record rows / Excel worksheet rows start at 2 after the header. "
         "No sales rows are discarded."
     )
-    with st.expander("Cleaning details and rows needing attention", expanded=report["status"] == "invalid"):
-        st.write("Status: " + report["status"])
-        st.write("Successful transformations: " + ", ".join(
-            f"{key.replace('_', ' ')}: {value}" for key, value in report["changes"].items()
-        ))
-        for key, title in [
-            ("column_normalizations", "Header normalization"),
-            ("aliases_mapped", "Column aliases"),
-            ("issues", "Validation issues"),
-            ("duplicate_groups", "Possible duplicate source rows"),
-        ]:
-            if report[key]:
-                st.write(title)
-                st.dataframe(report[key], hide_index=True, width="stretch")
+    with st.expander(
+        "Cleaning details and rows needing attention",
+        expanded=report["status"] == "invalid",
+        key=f"validation_details:{source_key!r}:{report['status']}",
+        on_change="rerun",
+    ) as details:
+        if details.open:
+            st.write("Status: " + report["status"])
+            st.write("Successful transformations: " + ", ".join(
+                f"{key.replace('_', ' ')}: {value}" for key, value in report["changes"].items()
+            ))
+            for key, title in [
+                ("column_normalizations", "Header normalization"),
+                ("aliases_mapped", "Column aliases"),
+                ("issues", "Validation issues"),
+                ("duplicate_groups", "Possible duplicate source rows"),
+            ]:
+                if report[key]:
+                    st.write(title)
+                    st.dataframe(report[key], hide_index=True, width="stretch")
     for warning in report["warnings"]:
         st.warning(warning)
 
 
+source_key = (mode,)
 try:
-    df, validation_report = load_sales_with_report(
-        Path(__file__).with_name("sample_data").joinpath("sales.csv")
-        if mode == "Sample data" else uploaded
-    )
+    if mode == "Upload a file":
+        # The extension affects parsing; equal names/sizes alone are not identity.
+        source_key = (
+            mode, Path(uploaded.name).suffix.lower(),
+            sha256(uploaded.getvalue()).hexdigest(),
+        )
+        cached = st.session_state.get(UPLOAD_CACHE_KEY)
+        if cached is not None and cached["source_key"] == source_key:
+            df, validation_report = cached["dataframe"], cached["report"]
+        else:
+            # Invalidate before loading: a failed replacement cannot revive old data.
+            st.session_state.pop(UPLOAD_CACHE_KEY, None)
+            df, validation_report = load_sales_with_report(uploaded)
+            st.session_state[UPLOAD_CACHE_KEY] = {
+                "source_key": source_key, "dataframe": df, "report": validation_report,
+            }
+    else:
+        df, validation_report = load_sales_with_report(
+            Path(__file__).with_name("sample_data").joinpath("sales.csv")
+        )
 except SalesValidationError as exc:
+    st.session_state.pop(UPLOAD_CACHE_KEY, None)
     st.error(str(exc))
-    show_validation_report(exc.report)
+    show_validation_report(exc.report, source_key)
     st.stop()
 except ValueError as exc:
+    st.session_state.pop(UPLOAD_CACHE_KEY, None)
     st.error(str(exc))
     st.stop()
 
-show_validation_report(validation_report)
+show_validation_report(validation_report, source_key)
 
 if mode == "Sample data":
     st.info("Demo mode — these are fictional sales, not your business results.")
@@ -109,6 +139,9 @@ st.subheader("Business observations")
 st.caption("Calculated from your selected data. These are rule-based observations, not AI answers.")
 for message in generate_insights(metrics):
     st.write("• " + message)
-with st.expander("View selected sales data"):
-    st.dataframe(filtered, hide_index=True, width="stretch")
+with st.expander(
+    "View selected sales data", key=f"raw_sales:{source_key!r}", on_change="rerun",
+) as raw_sales:
+    if raw_sales.open:
+        st.dataframe(filtered, hide_index=True, width="stretch")
 st.caption("AI Business Analyst is not connected in this starter version.")
