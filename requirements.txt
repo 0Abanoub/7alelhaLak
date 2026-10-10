@@ -3,3 +3,8 @@ pandas
 plotly
 openpyxl
 python-dotenv
+openpyxl
+pandas
+plotly
+python-dotenv
+streamlit
