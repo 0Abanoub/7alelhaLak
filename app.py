@@ -95,7 +95,15 @@ if filtered.empty:
     st.info("No sales match these filters. Choose another date range or product.")
     st.stop()
 
-metrics = analyze_sales(filtered)
+try:
+    metrics = analyze_sales(filtered)
+except (ValueError, OverflowError, FloatingPointError):
+    st.error(
+        "The selected sales are outside the supported calculation range. "
+        "Review quantities, unit prices and unit costs, or choose a different "
+        "selection. No dashboard or observations were generated."
+    )
+    st.stop()
 render_dashboard(metrics)
 st.subheader("Business observations")
 st.caption("Calculated from your selected data. These are rule-based observations, not AI answers.")

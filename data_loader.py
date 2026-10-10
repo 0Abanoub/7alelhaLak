@@ -70,6 +70,13 @@ def _missing(value) -> bool:
         return False
 
 
+def _safe_header(header: str) -> str:
+    """Only known schema names may be echoed; a missing header may be sales data."""
+    normalized = re.sub(r"\s+", "_", header.strip().lower())
+    known = REQUIRED | {"unit_cost"} | set(ALIASES)
+    return header if normalized in known else "[unrecognized header]"
+
+
 def _headers(headers: list, report: dict) -> list[str]:
     """Check originals, normalized names, and aliases before Pandas sees them."""
     original_seen, normalized_seen, canonical_seen = {}, {}, {}
@@ -93,23 +100,24 @@ def _headers(headers: list, report: dict) -> list[str]:
                 earlier, earlier_position = seen[key]
                 collision = (
                     stage,
-                    f"Columns {earlier_position} ({earlier!r}) and {position} "
-                    f"({original!r}) collide at {canonical!r}. Rename or remove one column.",
+                    f"Columns {earlier_position} ({_safe_header(earlier)!r}) and {position} "
+                    f"({_safe_header(original)!r}) collide. Rename or remove one column.",
                 )
                 break
         if collision:
-            _issue(report, 1, canonical, f"{collision[0]}_header_collision", collision[1])
+            field = canonical if canonical in REQUIRED | {"unit_cost"} else "header"
+            _issue(report, 1, field, f"{collision[0]}_header_collision", collision[1])
         original_seen.setdefault(original, (original, position))
         normalized_seen.setdefault(normalized, (original, position))
         canonical_seen.setdefault(canonical, (original, position))
         if original != normalized:
             report["column_normalizations"].append({
-                "column_position": position, "original_header": original,
-                "normalized_header": normalized,
+                "column_position": position, "original_header": _safe_header(original),
+                "normalized_header": _safe_header(normalized),
             })
         if normalized != canonical:
             report["aliases_mapped"].append({
-                "column_position": position, "original_header": original,
+                "column_position": position, "original_header": _safe_header(original),
                 "canonical_field": canonical,
             })
     _stop(report)
@@ -227,6 +235,32 @@ def _validate(df: pd.DataFrame, report: dict, source_rows: list[int]) -> tuple[p
             _issue(report, None, "quantity", "total_overflow",
                    "Reduce quantity magnitudes; total units are outside the supported numeric range.")
     _stop(report)
+    if "unit_cost" in rows:
+        # Mirror the analytics margin operations, including zero-revenue exclusions.
+        # Names stay internal: only source rows and safe field names enter reports.
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+            amounts = pd.DataFrame({
+                "product": rows["product"], "revenue": calculated["revenue"],
+                "profit": calculated["revenue"] - calculated["cost"],
+            })
+            products = amounts.groupby("product")[["revenue", "profit"]].sum()
+            margins = products["profit"].div(
+                products["revenue"].where(products["revenue"].ne(0))
+            ) * 100
+            invalid_products = products.index[
+                products["revenue"].ne(0) & ~np.isfinite(margins)
+            ]
+            fix = (
+                "Review unit prices and unit costs; the calculated profit margin "
+                "is outside the supported numeric range. No analysis was generated."
+            )
+            for position in np.flatnonzero(rows["product"].isin(invalid_products)):
+                _issue(report, source_rows[int(position)], "profit_margin", "overflow", fix)
+            total_revenue = float(calculated["revenue"].sum())
+            total_profit = total_revenue - float(calculated["cost"].sum())
+            if total_revenue and not np.isfinite(total_profit / total_revenue * 100):
+                _issue(report, None, "profit_margin", "total_overflow", fix)
+        _stop(report)
     if "unit_cost" not in rows:
         report["warnings"].append("Unit costs are absent; profit and margins are unavailable.")
     # Group only duplicate rows. No customer cell values enter the report.

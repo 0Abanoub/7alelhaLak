@@ -180,11 +180,19 @@ def render_dashboard(metrics: dict) -> None:
         with column:
             st.metric(label, value)
 
-    if profit is None or margin is None:
+    if profit is None:
         st.info(
             "Profit and margin are unavailable because cost data is missing. "
             "No profit has been estimated."
         )
+    elif margin is None:
+        if metrics.get("total_revenue") == 0:
+            st.info(
+                "Profit margin is unavailable because total revenue is zero. "
+                "Profit is calculated from the supplied costs."
+            )
+        else:
+            st.info("Profit margin is unavailable; calculated profit is shown.")
 
     st.markdown('<div class="dash-divider"></div>', unsafe_allow_html=True)
     daily_sales = _frame(metrics, "daily_sales", ("date", "revenue"))

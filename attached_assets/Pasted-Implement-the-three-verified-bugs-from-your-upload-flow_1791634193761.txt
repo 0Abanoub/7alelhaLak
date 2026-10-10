@@ -1,0 +1,30 @@
+Implement the three verified bugs from your upload-flow review. Keep the patch minimal and add regression tests.
+Important repository safeguard: You reported a pre-existing .replit change in the working tree. Inspect git status and the diff before starting. Preserve that change exactly. Do not revert it, stage it, or include it in this work.
+Bug 1 — Privacy leak in headerless CSV reports (highest priority)
+In data_loader.py, a headerless CSV may cause the first sales record to be treated as column headers. Its original values can then appear in column_normalizations or aliases_mapped in the validation report, which app.py displays.
+- Reproduce the issue with an in-memory CSV containing a unique marker such as PRIVATE_REVIEW_MARKER.
+- Ensure malformed headers cannot cause arbitrary customer data to be copied into report fields or exception messages.
+- Preserve useful, actionable header diagnostics, such as column positions and safe error types.
+- Add a regression test asserting the marker appears neither in the report nor in the exception message.
+- Do not weaken the existing header-collision checks.
+Bug 2 — Numeric overflow in margin calculations
+The review reproduced a dataset with quantity 1, unit price 1e-308, and unit cost 100 that passes loading but causes margin calculations in analytics.py to overflow.
+- Trace the actual margin calculation and its numeric limits.
+- Reject or safely handle unsupported results before they become an uncaught Streamlit error.
+- Preserve valid negative-profit cases and the existing rule that zero revenue produces an unavailable margin.
+- Add a regression test for this exact reproduction and verify that the user receives a controlled, actionable outcome.
+Do not simply suppress all arithmetic errors or replace invalid financial results with zero.
+Bug 3 — Misleading zero-revenue explanation
+In dashboard.py, a sale with zero revenue and complete costs is described as unavailable because costs are missing, even though analytics correctly identifies zero revenue as the reason.
+- Correct the wording to reflect the actual reason.
+- Preserve the existing profit and margin values.
+- Add a focused regression test.
+Guardrails
+- Inspect the current implementation and tests before editing.
+- Make only changes necessary for these three bugs and their tests.
+- Do not change .replit, dependencies, upload limits, aliases, or unrelated files.
+- Do not change duplicate-row retention or source-row tracking.
+- Do not commit, push, merge, reset, or discard changes.
+- Run the focused regression tests and then the full test suite using the project's existing environment.
+- Report exact changed files, test commands and results, and any remaining limitations. Clearly distinguish executed tests from browser checks.
+Stop after reporting the results. Do not make additional changes without approval.
